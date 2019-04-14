@@ -1,0 +1,641 @@
+---
+title: "423 Homework 2"
+output: html_document
+---
+
+#########################
+## EXERCISE 1
+#########################
+
+1. Use the auto data set from JWHT problem 3.9 on page 122. Type the following:
+
+
+```{r setup, include=FALSE}
+auto = read.table("http://www-bcf.usc.edu/~gareth/ISL/Auto.data", header=T, na.strings="?")
+auto$origin = factor(auto$origin, 1:3, c("US", "Europe", "Japan"))
+```
+
+(a) Regress mpg on cylinders, displacement, weight, and year. Comment on the signs of the estimated coefficients and note which are significantly different from 0. What is value of R2?
+
+```{r auto}
+fit = lm(mpg ~ cylinders + displacement + weight + year, auto)
+summary(fit)
+```
+
+<!--
+Call:
+lm(formula = mpg ~ cylinders + displacement + weight + year, 
+    data = auto)
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+-8.995 -2.270 -0.165  2.053 14.368 
+
+Coefficients:
+               Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  -14.076941   4.055159  -3.471 0.000575 ***
+cylinders     -0.289589   0.329225  -0.880 0.379611    
+displacement   0.004973   0.006701   0.742 0.458425    
+weight        -0.006702   0.000572 -11.717  < 2e-16 ***
+year           0.764751   0.050684  15.089  < 2e-16 ***
+---
+Signif. codes:  0 ?***? 0.001 ?**? 0.01 ?*? 0.05 ?.? 0.1 ? ? 1
+
+Residual standard error: 3.436 on 392 degrees of freedom
+Multiple R-squared:  0.8091,	Adjusted R-squared:  0.8072 
+F-statistic: 415.5 on 4 and 392 DF,  p-value: < 2.2e-16
+-->
+
+<!--
+- it looks like for cylinders the relationship has a negative relationship with mpg that is fairly strong
+- it looks like for displacement the relationship has a positive relationship with mpg that is not really strong
+- it looks like for weight the relationship has a negative relationship with mpg that is not really strong
+- it looks like for year the relationship has a positive relationship with mpg that seems fairly strong
+
+- R-squared is 0.8091
+-->
+
+(b) Compute the variance inflation factors. What do they tell you?
+
+```{r fit}
+vif(fit)
+```
+
+<!--
+   cylinders displacement       weight         year 
+   10.524432    16.406259     7.888061     1.173000 
+-->
+
+<!--
+- VIF indicates there is collinarity with cylinders, displacement, and weight
+- This makes sense if the vehicle has more cylinders the engine will be larger having better displacement. The engine will also be bigger and will weigh more
+-->
+
+(c) Drop weight from the model. What happens to the parameter estimates and R2?
+```{r auto}
+fit2 = lm(mpg ~ cylinders + displacement + year, auto)
+summary(fit2)
+confint(fit2)
+```
+
+<!--
+Call:
+lm(formula = mpg ~ cylinders + displacement + year, data = auto)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-10.0801  -2.6445  -0.2925   2.1004  14.9103 
+
+Coefficients:
+               Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  -18.199719   4.688296  -3.882 0.000122 ***
+cylinders     -0.620910   0.380657  -1.631 0.103658    
+displacement  -0.041545   0.006265  -6.632  1.1e-10 ***
+year           0.699324   0.058461  11.962  < 2e-16 ***
+---
+Signif. codes:  0 ?***? 0.001 ?**? 0.01 ?*? 0.05 ?.? 0.1 ? ? 1
+
+Residual standard error: 3.988 on 393 degrees of freedom
+Multiple R-squared:  0.7423,	Adjusted R-squared:  0.7403 
+F-statistic: 377.3 on 3 and 393 DF,  p-value: < 2.2e-16
+-->
+
+<!--
+                    2.5 %      97.5 %
+(Intercept)  -27.41699707 -8.98244102
+cylinders     -1.36928819  0.12746770
+displacement  -0.05386134 -0.02922882
+year           0.58438957  0.81425899
+-->
+
+<!--
+OLD (cylinders + displacement + weight + year)
+cylinders     -0.289589   0.329225  -0.880 0.379611    
+displacement   0.004973   0.006701   0.742 0.458425    
+weight        -0.006702   0.000572 -11.717  < 2e-16 ***
+year           0.764751   0.050684  15.089  < 2e-16 ***
+
+Multiple R-squared:  0.8091,	Adjusted R-squared:  0.8072 
+
+NEW (cylinders + displacement + year)
+cylinders     -0.620910   0.380657  -1.631 0.103658    
+displacement  -0.041545   0.006265  -6.632  1.1e-10 ***
+year           0.699324   0.058461  11.962  < 2e-16 ***
+
+Multiple R-squared:  0.7423,	Adjusted R-squared:  0.7403 
+
+
+- cylinders was -0.289589 and now -0.620910, still negative relationship, so more cylinders the negatively it affects mpg
+- displacement was 0.004973 and now -0.041545, it was posititve and now negative, it looks like it has some relationship that could be related with cylinders, and it affects mpg. This makes sense since the more cylinders you have the more the engine can displace. Yet, this might vary if the weight of the vehicle is large or small. This is why possibly the weight of the vehicle may have an impact with displacement and mpg.
+- year was 0.764751 and now 0.699324, still positive relationship, so there is something with the age of the vehicle that affects mpg. Newer vehicles may have better mpg while older vehicles have worse mpg.
+
+- R-squared decreases from 0.8091 to 0.7423 indicating that the "coefficient of determination" has reduced. This is the fraction of variability in y explained by the x variables. Since there are less variables there is less that is explaining mpg variances. This makes sense because we removed weight.
+-->
+
+(d) Drop weight and displacement from the model. What happens to the parameter estimates and R2?
+
+```{r auto}
+fit3 = lm(mpg ~ cylinders + year, auto)
+summary(fit3)
+```
+
+<!--
+Call:
+lm(formula = mpg ~ cylinders + year, data = auto)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-10.6462  -2.8847  -0.1399   2.5095  15.6875 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -17.30285    4.93534  -3.506 0.000507 ***
+cylinders    -3.00405    0.13223 -22.718  < 2e-16 ***
+year          0.75289    0.06098  12.347  < 2e-16 ***
+---
+Signif. codes:  0 ?***? 0.001 ?**? 0.01 ?*? 0.05 ?.? 0.1 ? ? 1
+
+Residual standard error: 4.2 on 394 degrees of freedom
+Multiple R-squared:  0.7135,	Adjusted R-squared:  0.712 
+F-statistic: 490.5 on 2 and 394 DF,  p-value: < 2.2e-16
+-->
+
+<!--
+OLD (cylinders + displacement + weight + year)
+cylinders     -0.289589   0.329225  -0.880 0.379611    
+displacement   0.004973   0.006701   0.742 0.458425    
+weight        -0.006702   0.000572 -11.717  < 2e-16 ***
+year           0.764751   0.050684  15.089  < 2e-16 ***
+
+Multiple R-squared:  0.8091,	Adjusted R-squared:  0.8072 
+
+NEW (cylinders + displacement + year)
+cylinders     -0.620910   0.380657  -1.631 0.103658    
+displacement  -0.041545   0.006265  -6.632  1.1e-10 ***
+year           0.699324   0.058461  11.962  < 2e-16 ***
+
+Multiple R-squared:  0.7423,	Adjusted R-squared:  0.7403 
+
+NEW NEW (cylinders + year)
+cylinders    -3.00405    0.13223 -22.718  < 2e-16 ***
+year          0.75289    0.06098  12.347  < 2e-16 ***
+
+Multiple R-squared:  0.7135,	Adjusted R-squared:  0.712 
+
+- cylinders has increased significantly from -0.289589/-0.620910 to -3.00405, the relationship is still negative with regards to mpg
+- year has not moved much but increases similar to the first model 0.764751/0.699324/0.75289
+- the third model considers cylinders as something significant (stars) in that it has something to do with mpg
+
+R-squared again decreases which makes sense since there are less variables that can contribute to influence mpg.
+-->
+
+```{r fit3}
+confint(fit3)
+vif(fit3)
+```
+<!--
+                  2.5 %    97.5 %
+(Intercept) -27.0057471 -7.599960
+cylinders    -3.2640138 -2.744078
+year          0.6330141  0.872773
+-->
+
+<!--
+cylinders      year 
+ 1.136639  1.136639 
+<!--
+
+<!--
+- just did the confidence interval to see if there is anything
+- VIF shows that there is very collinearity association with cylinders and year. So does this mean we have an x that affects y that isn't associated? Possibly! Probably should compare other collinear variables associated with cylinders to see if it has greater predictability with year to indicate mpg prediction.
+-->
+
+#########################
+## EXERCISE 2
+#########################
+
+JWHT problem 3.14a?f on page 125. For part (c)?(e), are the parameters ?covered? by the 95% confidence intervals?
+
+(a) Perform the following commands in R:
+
+```{r setup, include=FALSE}
+set.seed(1)
+x1=runif(100)
+x2=0.5*x1+rnorm(100)/10
+y=2+2*x1+0.3*x2+rnorm(100)
+```
+
+The last line corresponds to creating a linear model in which y is a function of x1 and x2. Write out the form of the linear model. What are the regression coefficients?
+
+<!--
+- make note that the y=2+2*x1+0.3*x2+rnorm(100) is the actual regression line and not some predicted line
+-->
+
+(b) What is the correlation between x1 and x2? Create a scatterplot displaying the relationship between the variables.
+
+```{r x1, x2}
+cor(x1,x2)
+plot(x2~x1)
+```
+
+<!--
+[1] 0.8351212
+--> 
+
+<!--
+- the result of correlating x1 and x2 is 0.8351212
+- it looks like the relationship is positive
+-->
+
+(c) Using this data, fit a least squares regression to predict y using x1 and x2. Describe the results obtained. What are B-hat0, B-hat1, and B-hat2? How do these relate to the true B-hat0, B-hat1, and B-hat2? Can you reject the null hypothesis H0: B-hat1 = 0? How about the null hypothesis H0: B-hat2 = 0?
+
+```{r}
+fitc = lm(y ~ x1 + x2)
+fitc
+```
+
+<!--
+Call:
+lm(formula = y ~ x1 + x2)
+
+Coefficients:
+(Intercept)           x1           x2  
+       2.13         1.44         1.01  
+-->
+
+<!--
+- it looks like the multiple regression line would look ilke 2.13 = 1.44*x1 + 1.01*x2
+-->
+
+```{r fitc}
+summary(fitc)
+confint(fitc)
+```
+
+<!--
+Call:
+lm(formula = y ~ x1 + x2)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-2.8311 -0.7273 -0.0537  0.6338  2.3359 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)   2.1305     0.2319   9.188 7.61e-15 ***
+x1            1.4396     0.7212   1.996   0.0487 *  
+x2            1.0097     1.1337   0.891   0.3754    
+---
+Signif. codes:  0 ?***? 0.001 ?**? 0.01 ?*? 0.05 ?.? 0.1 ? ? 1
+
+Residual standard error: 1.056 on 97 degrees of freedom
+Multiple R-squared:  0.2088,	Adjusted R-squared:  0.1925 
+F-statistic:  12.8 on 2 and 97 DF,  p-value: 1.164e-05
+
+                   2.5 %   97.5 %
+(Intercept)  1.670278673 2.590721
+x1           0.008213776 2.870897
+x2          -1.240451256 3.259800
+-->
+
+<!--
+B-0 = 2.13
+B-1 = 1.44
+B-2 = 1.01
+
+B-hat0 = 2.1305
+B-hat1 = 1.4396
+B-hat2 = 1.0097
+
+- the predicted model is very close to the true linear model in comparison
+- x1 - can reject the null hypothesis that H0: B1 = 0, this is because P is 0.0487 which is less than 0.05, there is some significance (stars) meaning that it has some sort of influence with y (intercept)
+- x2 - cannot reject the null hypothesis that H0: B1 = 0, this is because P is 0.3754 which is greater than 0.05, so there is a possiblity of occurance of the scenario happening
+-->
+
+(d) Now fit a least squares regression to predict y using only x1. Comment on your results. Can you reject the null hypothesis H0: B1 = 0?
+```{r}
+fitd = lm (y ~ x1)
+summary(fitd)
+```
+
+<!--
+Call:
+lm(formula = y ~ x1)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-2.89495 -0.66874 -0.07785  0.59221  2.45560 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)   2.1124     0.2307   9.155 8.27e-15 ***
+x1            1.9759     0.3963   4.986 2.66e-06 ***
+---
+Signif. codes:  0 ?***? 0.001 ?**? 0.01 ?*? 0.05 ?.? 0.1 ? ? 1
+
+Residual standard error: 1.055 on 98 degrees of freedom
+Multiple R-squared:  0.2024,	Adjusted R-squared:  0.1942 
+F-statistic: 24.86 on 1 and 98 DF,  p-value: 2.661e-06
+-->
+
+<!--
+FROM C
+(Intercept)   2.1305     0.2319   9.188 7.61e-15 ***
+x1            1.4396     0.7212   1.996   0.0487 *  
+x2            1.0097     1.1337   0.891   0.3754    
+
+FROM D
+(Intercept)   2.1124     0.2307   9.155 8.27e-15 ***
+x1            1.9759     0.3963   4.986 2.66e-06 ***
+
+- With only x1 it looks like there is stronger significance. The P for x1 is now well below 0.05 showing P = 2.66e-06. So we can stil reject the null hypothesis.
+-->
+
+(e) Now fit a least squares regression to predict y using only x2. Comment on your results. Can you reject the null hypothesis H0: B1 = 0?
+
+
+```{r}
+fite =lm(y ~ x2)
+summary(fite)
+```
+
+<!--
+Call:
+lm(formula = y ~ x2)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-2.62687 -0.75156 -0.03598  0.72383  2.44890 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)   2.3899     0.1949   12.26  < 2e-16 ***
+x2            2.8996     0.6330    4.58 1.37e-05 ***
+---
+Signif. codes:  0 ?***? 0.001 ?**? 0.01 ?*? 0.05 ?.? 0.1 ? ? 1
+
+Residual standard error: 1.072 on 98 degrees of freedom
+Multiple R-squared:  0.1763,	Adjusted R-squared:  0.1679 
+F-statistic: 20.98 on 1 and 98 DF,  p-value: 1.366e-05
+-->
+
+<!--
+FROM C
+(Intercept)   2.1305     0.2319   9.188 7.61e-15 ***
+x1            1.4396     0.7212   1.996   0.0487 *  
+x2            1.0097     1.1337   0.891   0.3754    
+
+FROM D
+(Intercept)   2.1124     0.2307   9.155 8.27e-15 ***
+x1            1.9759     0.3963   4.986 2.66e-06 ***
+
+FROM E
+(Intercept)   2.3899     0.1949   12.26  < 2e-16 ***
+x2            2.8996     0.6330    4.58 1.37e-05 ***
+
+- With only x2 it looks like there is strong significance. The P for x2 is 1.37e-05 which is < 0.05. There is a very low chance this is a possibliity of occurance in affecting y (Intercept). So we can reject the null hypothesis where before we could not.
+-->
+
+For part (c)?(e), are the parameters ?covered? by the 95% confidence intervals?
+```{r fitc, fitd, fite}
+confint(fitc)
+confint(fitd)
+confint(fite)
+```
+
+<!--
+                   2.5 %   97.5 %
+(Intercept)  1.670278673 2.590721
+x1           0.008213776 2.870897
+x2          -1.240451256 3.259800
+               2.5 %   97.5 %
+(Intercept) 1.654488 2.570299
+x1          1.189529 2.762329
+               2.5 %   97.5 %
+(Intercept) 2.003116 2.776783
+x2          1.643324 4.155846
+-->
+
+<!--
+x1 CI[0.008213776, 2.870897]
+x2 CI[-1.240451256, 3.259800]
+- given the confidence intervals when x1 and x2 are both together they are not "covered" by the 95% confidence intervals
+
+x1 CI[1.189529, 2.762329]
+x2 CI[1.643324, 4.155846]
+- when x1 and x2 are alone they are "covered" by the 95% interval
+-->
+
+
+#########################
+## EXERCISE 3
+#########################
+
+3. Consider the quality control data set discussed in class.
+Look at page 53 in the packet, this is using anova and drop1 commands
+
+```{r}
+quality <- read.csv("./quality.csv")
+```
+
+(a) How much variation is left unexplained by the intercept model? (this will be
+called the null deviance)
+```{r}
+sum((quality$defect-mean(quality$defect))^2)
+```
+
+<!--
+This is the TSS (Total Sum of Squares)
+[1] 10929.29
+-->
+
+<!--
+- so this is the unexplained portion (residual on page 53 looking on the diagram)
+-->
+
+(b) How much variation is explained by adding rate to the intercept model?
+```{r}
+fitb = lm(quality$defect ~ quality$rate, quality)
+anova(fitb)
+```
+
+<!--
+Analysis of Variance Table
+
+Response: quality$defect
+             Df Sum Sq Mean Sq F value    Pr(>F)    
+quality$rate  1 8566.9  8566.9  101.54 8.132e-11 ***
+Residuals    28 2362.4    84.4                      
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+-->
+
+<!--
+- 8566.9 (which is rate) can explain the majority of the variation
+- 2362.4 is the residuals which is the unexplained portion
+-->
+
+
+(c) How much additional variation is explained by adding am to a model that already has rate in it?
+```{r}
+fitc = lm(quality$defect ~ quality$rate + quality$am, quality)
+anova(fitc)
+```
+
+<!--
+Analysis of Variance Table
+
+Response: quality$defect
+             Df Sum Sq Mean Sq F value    Pr(>F)    
+quality$rate  1 8566.9  8566.9 98.2055 1.724e-10 ***
+quality$am    1    7.1     7.1  0.0815    0.7775    
+Residuals    27 2355.3    87.2                      
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+-->
+
+<!--
+- 7.1 is the additional variation exmplained by adding am to a model tht already has rate
+- so in the model 8566.9 and 7.1 can be explained by rate and am, but there is 2355.3 not explained
+-->
+
+(d) How much variation is unexplained by a model having both predictors?
+<!--
+2355.3 is the variation that is unexplained by the model having both predictors (rate and am)
+-->
+
+(e) How much less variation is explained if we drop rate from a model with both predictors in it?
+```{r}
+drop1(fitc, test="F")
+```
+
+<!--
+Single term deletions
+
+Model:
+quality$defect ~ quality$rate + quality$am
+             Df Sum of Sq    RSS    AIC F value    Pr(>F)    
+<none>                    2355.3 136.90                      
+quality$rate  1    5440.5 7795.8 170.80 62.3669 1.724e-08 ***
+quality$am    1       7.1 2362.4 134.99  0.0815    0.7775    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+-->
+
+<!--
+BOTH PREDICTORS
+quality$rate  1 8566.9  8566.9 98.2055 1.724e-10 ***
+quality$am    1    7.1     7.1  0.0815    0.7775    
+
+DROP1
+quality$rate  1    5440.5 7795.8 170.80
+quality$am    1       7.1 2362.4 134.99
+
+- It seems variation of rate decreases from 8566.9 to 5440.5, but am stays the same
+-->
+
+(f) Compute R2 for the two-predictor model by hand? using only the numbers you have found above. Confirm your answer by having R compute it.
+
+<!--
+TSS = 10929.29 (this is from (a))
+RSS = 2355.3 (this is from (e))
+R2 = 1 - RSS/TSS (this equation is from page 33 of packet)
+R2 = 1 - (2355.3/10929.29) = 0.78449652264
+-->
+
+```{r}
+summary(fitc)
+```
+
+<!--
+Call:
+lm(formula = quality$defect ~ quality$rate + quality$am, data = quality)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-18.0855  -5.0016  -0.8756   7.6177  22.2812 
+
+Coefficients:
+               Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  -126.29287   18.29411  -6.903 2.03e-07 ***
+quality$rate    0.64619    0.08182   7.897 1.72e-08 ***
+quality$am      1.19647    4.19152   0.285    0.777    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 9.34 on 27 degrees of freedom
+Multiple R-squared:  0.7845,	Adjusted R-squared:  0.7685 
+F-statistic: 49.14 on 2 and 27 DF,  p-value: 1.004e-09
+-->
+
+<!--
+- note that by running summary on fitc the R-squared of 0.7845 looks like it is matching the hand calculation of R2
+-->
+
+(g) Compute the F statistic for the overall test of significance by hand.
+
+<!--
+TSS = 10929.29 (this is from (a))
+RSS = 2355.3 (this is from (e))
+
+F-statistic: 49.14 on 2 and 27 DF,  p-value: 1.004e-09 (got this from the summary from (f))
+p = 2 degrees of freedom
+n-p-1 = 27 degrees of freedom
+
+F = ((TSS-RSS)/p) / (RSS/(n-p-1))
+= ((10929.29 - 2355.3)/2)/(2355.3/27) =
+= 49.1440007642
+
+- note that this hand calculation matches the summary on (f) for F-statistic 49.14, or pretty close at least
+- this tests "overall significance", this test compares the full model (H1) with the null model
+-->
+
+```{r}
+1 - pf(49.1440007642, 2, 27)
+```
+
+<!--
+[1] 1.003767e-09
+
+F-statistic: 49.14 on 2 and 27 DF,  p-value: 1.004e-09
+- grab this line from the summary of (f)
+- Note that the p-value matches the p-value from the summary
+- what does this mean, I have no f'ing clue... may need to read the packet more...
+-->
+
+(h) Using the two-variable model, compute the F statistic to test H0 : ??1 = 0 by
+hand (where ??1 is for rate) (hint: it is in the drop1 output).
+
+<!---
+ANOVA
+             Df Sum Sq Mean Sq F value    Pr(>F)    
+quality$rate  1 8566.9  8566.9 98.2055 1.724e-10 ***
+quality$am    1    7.1     7.1  0.0815    0.7775    
+Residuals    27 2355.3    87.2                   
+
+DROP1
+             Df Sum of Sq    RSS    AIC F value    Pr(>F)    
+<none>                    2355.3 136.90                      
+quality$rate  1    5440.5 7795.8 170.80 62.3669 1.724e-08 ***
+quality$am    1       7.1 2362.4 134.99  0.0815    0.7775    
+
+- Look at page 55 for the equation
+F = ((change RSS)/(change df))/(Se^2)
+
+- look at the stars and use that to perform this calculation, in this case we are looking at rate
+change RSS = 5440.5 and its df is 1 (get this from the DROP1)
+Se^2 = 2355.3 and its df is 27 (get this from the ANOVA)
+
+F = (5440.5/1) / (2355.3/27) = 62.3672143676
+-->
+
+```{r}
+1 - pf(62.3672143676, 1, 27)
+```
+
+<!--
+[1] 1.724172e-08
+
+- calculate the p-value and this is 1.724172e-08, this matches with the p-value from the DROP1 for rate which is 1.724e-08
+- again, not sure what this exactly means, who the f knows... this is what is done on page 55 of the packet
+-->
