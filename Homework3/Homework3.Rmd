@@ -1,0 +1,322 @@
+---
+title: "Homework3"
+output: html_document
+---
+
+#########################
+## EXERCISE 1
+#########################
+
+1. Use the auto data set from JWHT problem 3.9 on page 122.
+     
+(a) The origin variable is categorical, where 1=US, 2=Europe and 3=Japan. Type the following command to make it a factor variable and assign meaningful labels:
+
+```{r}
+auto = read.table("http://www-bcf.usc.edu/~gareth/ISL/Auto.data", header=T, na.strings="?")
+     auto$origin = factor(auto$origin, 1:3, c("US", "Europe", "Japan"))
+```
+
+(b) Regress mpg on origin, weight and year. Examine the diagnostic plots and comment on which assumptions of the linear model, if any, are violated.
+
+```{r auto}
+fit = lm(mpg ~ origin + weight + year, auto)
+plot(fit)
+```
+
+<!--
+- It looks like the residuals form a U shape and is not a snowstorm random pattern. The Q-Q model shows a deviation from the line. This is not a linear model, so should not have tried to fit a linear regresion on the data.
+-->
+
+(c) Regress log(mpg) on origin, log(weight), year and year squared. Examine the diagnostic plots and the summary. For you to think about but not turn in: why would year have this effect for year?
+
+```{r}
+fit2 = lm(log(mpg) ~ origin + log(weight) + year + I(year^2), auto)
+summary(fit2)
+plot(fit2)
+```
+
+<!--
+Call:
+lm(formula = log(mpg) ~ origin + log(weight) + year + I(year^2), 
+    data = auto)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.37408 -0.06782  0.00899  0.06903  0.35766 
+
+Coefficients:
+               Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  18.4693014  2.6833895   6.883 2.34e-11 ***
+originEurope  0.0668291  0.0176293   3.791 0.000174 ***
+originJapan   0.0319711  0.0179382   1.782 0.075477 .  
+log(weight)  -0.8750305  0.0270390 -32.362  < 2e-16 ***
+year         -0.2559684  0.0712094  -3.595 0.000366 ***
+I(year^2)     0.0019051  0.0004687   4.065 5.81e-05 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.1136 on 391 degrees of freedom
+Multiple R-squared:  0.8898,	Adjusted R-squared:  0.8884 
+F-statistic: 631.7 on 5 and 391 DF,  p-value: < 2.2e-16
+-->
+
+<!--
+- Check the null hypothesis, that the year and the quadratic slope I(year^2) are both equal to zero. So the null hypothesis can be rejected since both values are < 0.05. year is 0.000366 and I(year^2) is 5.81e-05.
+-->
+
+(d) Describe the effect of year on log(mpg), i.e., is it U-shaped, inverted-U shaped, or linear? If it is nonlinear, where is the minimum or maximum. Draw a graph showing the effect.
+
+```{r}
+fit3 = lm(year ~ mpg + log(mpg), auto)
+summary(fit3)
+plot(fit3)
+```
+
+<!--
+Call:
+lm(formula = year ~ mpg + log(mpg), data = auto)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-8.0712 -2.1187  0.1722  2.4259  6.5888 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  65.4400     5.2191  12.539   <2e-16 ***
+mpg           0.1904     0.1078   1.767    0.078 .  
+log(mpg)      1.9598     2.4796   0.790    0.430    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 3.007 on 394 degrees of freedom
+Multiple R-squared:  0.3392,	Adjusted R-squared:  0.3358 
+F-statistic: 101.1 on 2 and 394 DF,  p-value: < 2.2e-16
+-->
+
+<!--
+- The data looks linear.
+- Check the null hypothesis, that the x slope and the log slope log(mpg) are both equal to zero. The Null hypothesis cannot be rejected since the p values of each coefficients are > 0.05. mpg is 0.078 and the log(mpg) is 0.430.
+-->
+
+(e) What does the coefficient for log(weight) tell you?
+```{r}
+coef(fit2)
+```
+
+<!--
+ (Intercept) originEurope  originJapan  log(weight)         year    I(year^2) 
+18.469301378  0.066829060  0.031971087 -0.875030521 -0.255968375  0.001905147 
+-->
+
+<!--
+- This information can be seen on the summary in (c) as well, showing that there is a negative relationship. So there is a negative effect where the heavier a vehicle is, mpg goes down -0.875030521. Weight of a vehicle has a negative impact on vehicle mpg.
+-->
+
+(f) You should see that there are two dummy variables for the origin variable. If origin were dropped from the model (i.e., the two dummies were set equal to 0), by how much would RSS increase?
+<!--
+Dummy variables page 82 and 83 in packet. This is how we use nominal variables in a regression. They are called dummy (indicator) variables. Example was the quality case where AM and PM were compared and a variable (am) was assigned that took a value of 1 for morning shift and 0 for afternoon.
+
+Here origin was set to US, Europe, and Japan
+-->
+
+```{r}
+fit3 = lm(mpg ~ as.factor(origin) + weight + year, auto)
+summary(fit3)
+drop1(fit3, test="F")
+```
+<!--
+Call:
+lm(formula = mpg ~ as.factor(origin) + weight + year, data = auto)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-9.5855 -2.1343 -0.0344  1.7727 13.5142 
+
+Coefficients:
+                          Estimate Std. Error t value Pr(>|t|)    
+(Intercept)             -1.859e+01  3.968e+00  -4.683 3.90e-06 ***
+as.factor(origin)Europe  2.097e+00  5.110e-01   4.103 4.97e-05 ***
+as.factor(origin)Japan   2.203e+00  5.157e-01   4.271 2.44e-05 ***
+weight                  -5.900e-03  2.575e-04 -22.909  < 2e-16 ***
+year                     7.740e-01  4.815e-02  16.075  < 2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 3.336 on 392 degrees of freedom
+Multiple R-squared:  0.8201,	Adjusted R-squared:  0.8183 
+F-statistic: 446.8 on 4 and 392 DF,  p-value: < 2.2e-16
+
+Single term deletions
+
+Model:
+mpg ~ as.factor(origin) + weight + year
+                  Df Sum of Sq     RSS     AIC F value    Pr(>F)    
+<none>                          4362.9  961.60                      
+as.factor(origin)  2     275.4  4638.3  981.89  12.371 6.169e-06 ***
+weight             1    5841.1 10204.0 1296.90 524.808 < 2.2e-16 ***
+year               1    2876.0  7238.9 1160.61 258.400 < 2.2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+-->
+
+<!--
+- if we drop origin we will lose 275.4, and the p-value indicates that this field is significant where it is 6.169e-06 which is < 0.05.
+-->
+
+(g) Can you reject the null hypothesis that both origin dummies are 0, so that none of the origin levels have different effects?
+<!--
+yes, we can reject the null hypothesis, again the p-value is 6.169e-06 which is < 0.05 for as.factor(orign) which are treated as categorical (dummy variables).
+-->
+
+(h) Interpret the effect of origin on log(mpg). Which origin has the best gas milage? Worst? Rank them in order of gas milage from least to greatest.
+<!--
+Data from above summary(fit3)
+
+as.factor(origin)Europe  2.097e+00  5.110e-01   4.103 4.97e-05 ***
+as.factor(origin)Japan   2.203e+00  5.157e-01   4.271 2.44e-05 ***
+-->
+
+<!--
+- The interpretation of this data is that Europe is 2.097 better in mpg than the US
+- That Japan is 2.203 better in mpg than the US
+-->
+
+(i) For the test in question 1g, give the details of how the test statistic and P-value were computed.
+<!--
+- this is the data from the drop1, note that the test statistic F value is 12.371
+- note that the p value is 6.169e-06
+
+Single term deletions
+
+Model:
+mpg ~ as.factor(origin) + weight + year
+                  Df Sum of Sq     RSS     AIC F value    Pr(>F)    
+<none>                          4362.9  961.60                      
+as.factor(origin)  2     275.4  4638.3  981.89  12.371 6.169e-06 ***
+weight             1    5841.1 10204.0 1296.90 524.808 < 2.2e-16 ***
+year               1    2876.0  7238.9 1160.61 258.400 < 2.2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+-->
+
+Look at deviance
+<!--
+Make note of this line from above where the F value is 12.371 and P value is 6.169e-06
+                  Df Sum of Sq     RSS     AIC F value    Pr(>F)    
+as.factor(origin)  2     275.4  4638.3  981.89  12.371 6.169e-06 ***
+-->
+
+```{r}
+fit4 = lm(mpg ~ weight + year, auto)
+deviance(fit4)
+deviance(fit3)
+deviance(fit4) - deviance(fit3)
+```
+<!--
+[1] 4638.314  - deviance(fit4) (fit4 = lm(mpg ~ weight + year, auto)
+[1] 4362.945  - deviance(fit3) (fit3 = lm(mpg ~ as.factor(origin) + weight + year, auto)
+[1] 275.3693  - deviance(fit4) - deviance(fit3)
+
+- the deviance is what is the amount unexplained by the model
+- fit4 accounts for less so there is more that is unexplained
+- fit3 accounts for the categorical variable which includes origin, so there is less unexplained by that model
+- if you take the difference of the deviance of fit4 and fit3 you get 275.3693, this is the same as what the drop1 calculates. So this is how drop1 calculates the Sum of Sq, or what is explained by the model.
+-->
+
+The F statistic
+```{r}
+anova(fit3)
+```
+<!--
+Analysis of Variance Table
+
+Response: mpg
+                   Df Sum Sq Mean Sq F value    Pr(>F)    
+as.factor(origin)   2 8081.1  4040.5  363.03 < 2.2e-16 ***
+weight              1 8932.3  8932.3  802.54 < 2.2e-16 ***
+year                1 2876.0  2876.0  258.40 < 2.2e-16 ***
+Residuals         392 4362.9    11.1                      
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+-->
+<!--
+- get the residuals for the Mean Sq, which is 11.1
+- use the df degress of freedom from the drop1 for origin which is 2
+-->
+
+```{r}
+(deviance(fit4)-deviance(fit3))/2/11.1
+```
+<!--
+[1] 12.40402
+-->
+
+<!--
+- Calculate the F statistic which is 12.40402, which is close to the the drop1 F value of 12.371
+- Look at packet page 55 this shows the equation for F
+F = (delta RSS/ delta df) / Se^2
+- Looking at the video the above is what he did to calculate the F statistic
+-->
+
+The P value
+```{r}
+1-pf((deviance(fit4)-deviance(fit3))/2/11.1, 2, 392)
+```
+<!--
+[1] 5.978547e-06
+-->
+
+<!--
+- this is using the anova df 2 (origin) and df 392 (residual) to calculate the p-value, which is 5.978547e-06
+- this is not exactly the drop1 p-value for eff of 6.169e-06 but is close enough to say that it is < 0.05 and has an effect on the model
+-->
+
+(j) After controlling for the other vairables, what is the difference in log(mpg) between Japan and Europe, on the average?
+<!--
+not quite sure what to do here, have to think...
+-->
+
+(k) Is there a significant difference between the log gas milage for US and Japan after controlling for the other variables?
+<!--
+not quite sure what to do here, have to think...
+-->
+
+
+#########################
+## EXERCISE 2
+#########################
+
+2. A marketing research consultant evaluated the effects of the fee schedule, scope of work, and type of supervisory control on the quality of work performed under contract by independent marketing research agencies. The quality of work performed was measured by an index taking into account several characteristics of quality. Four agencies were chosen for each factor level combination and the quality of their work evaluated. Copy and paste the data below into R.
+
+```{r}
+   mrcontract = expand.grid(agency=LETTERS[1:4], sup=c("local","travel"),
+     scope=c("in-house", "subcontract"), fee=c("high","med","low"))
+   mrcontract$quality=c(124.3,120.6,120.7,122.6,112.7,110.2,113.5,108.6,115.1,
+     119.9,115.4,117.3,88.2,96,96.4,90.1,119.3,118.9,125.3,121.4,113.6,109.1,108.9,
+     112.3,117.2,114.4,113.4,120,92.7,91.1,90.7,87.9,90.9,95.3,88.8,92,78.6,80.6,
+     83.5,77.1,89.9,83,86.5,82.7,58.6,63.5,59.8,62.3)
+```
+
+(a) Regress quality on agency, fee and an interaction between sup and scope. State the estimated regression equation and use drop1 to test which terms are signfiicant.
+(b) Are there differences in quality between the agencies? To receive full credit state the null and alternative hypotheses, find the P value, state you decision (reject or not), and summarize your conclusion.
+(c) Are there differences in quality between the fee values? To receive full credit state the null and alternative hypotheses, find the P value, state you decision (reject or not), and summarize your conclusion.
+(d) What does the coefficient for feemed tell you? Test whether it is different from 0 and discuss what the results of this tell you from a managerial perspective.
+(e) Is the interaction between sup and scope significant? To receive full credit state the null and alternative hypotheses, find the P value, and state you decision (reject or not).
+(f) Construct and interaction plot for sup and scope. Write one sentence summariz- ing what the interaction plot tells you.
+
+
+#########################
+## EXERCISE 3
+#########################
+3. Use the data set part.csv, available from canvas. This question investigates how par- ticipation in a social media contest about a brand affect future spending on the brand. A brand sponsored a social media contest. Customers in the company’s database were invited to write about their relationship with the company on a social media forum. Those who participated by writing at least one word on the forum received a reward worth approximately $1, and the dummy variable tx indicates whether or not a cus- tomer participated. In total, 7089 customers participated, and there is a matched control group of 7089 consistent of customers who did not participate, but had similar purchase activities prior to the contest. The total sample size is thus 2×7089 = 14, 178. The variable y records the amount spent by each customer in the week following the contest. The variable x gives the amount spent per week prior to the contest and will be used as a control variable to account for differences in customer loyalty. Finally, the wc variable gives the word count of the entries, where wc = 0 for all who did not participate. Word count measures cognitive elaboration. Note that tx = (wc > 0).
+
+(a) Model 1: regress log(y + 1) on log(x + 1) and tx. Give the output.
+(b) Model 2: regress log(y + 1) on log(x + 1), tx and log(wc + 1). Give the output.
+(c) Use the following notation in answering the questions: log(y+1)=β0 +β1log(x+1)+β2tx+β3log(wc+1)+e,
+where β3 is constrained to be 0 in Model 1 and log is the natural log. Based on Model 1, does participation have a significant effect on future spending? Explain. Note: to receive full credit you should state null and alternative hypotheses and do something to determine whether H0 can be rejected at the 5% level.
+(d) Using Model 1, post-period spending is how many times greater for those who participate than for those who do not? Note that this question asks about spending and not log spending. Another way to ask this question is, suppose there are two people with identical pre-period spending, but one participates and the other does not. If y1 is the post-contest spending of a participant, and y0 is the post-contest spending of a non-participant, how many times greater is (y1 + 1) than (y0 + 1)?
+(e) Is (y + 1) proportional to (x + 1), i.e., is spending in the week after the contest proportional to pre-contest spending? How do you know? Note: to receive full credit, state a null and alternative hypothesis and do something to determine whether or not H0 can be rejected.
+(f) Why is the magnitude of the tx variable so different in Model 2 (0.050) than in Model 1 (0.244)?
+(g) Now consider Model 2. How do the results from Model 2 change your conclu- sions about how participation affects future spending. I am looking for you to summarize the key learnings from Model 2 succinctly.
+(h) Generate the normal probability plot for Model 2. What specifically does the plot tell you, and how does it (i.e., what the plot tells you) affect the conclusions you have drawn from the previous parts.
+(i) What do the results of this analysis suggest the company should do in the future when designing social media contests?

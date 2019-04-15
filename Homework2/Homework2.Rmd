@@ -68,7 +68,7 @@ vif(fit)
 
 <!--
 - VIF indicates there is collinarity with cylinders, displacement, and weight
-- This makes sense if the vehicle has more cylinders the engine will be larger having better displacement. The engine will also be bigger and will weigh more
+- This makes sense if the vehicle has more cylinders the engine will be larger having better displacement. The engine will also be bigger and will weigh more.
 -->
 
 (c) Drop weight from the model. What happens to the parameter estimates and R2?
@@ -207,7 +207,7 @@ cylinders      year
 
 <!--
 - just did the confidence interval to see if there is anything
-- VIF shows that there is very collinearity association with cylinders and year. So does this mean we have an x that affects y that isn't associated? Possibly! Probably should compare other collinear variables associated with cylinders to see if it has greater predictability with year to indicate mpg prediction.
+- VIF shows that there is collinearity association with cylinders and year. So does this mean we have an x that affects y that isn't associated? Possibly! Probably should compare other collinear variables associated with cylinders to see if it has greater predictability with year to indicate mpg prediction.
 -->
 
 #########################
@@ -432,10 +432,12 @@ x2 CI[1.643324, 4.155846]
 #########################
 
 3. Consider the quality control data set discussed in class.
+<!--
 Look at page 53 in the packet, this is using anova and drop1 commands
+-->
 
 ```{r}
-quality <- read.csv("./quality.csv")
+quality <- read.csv("../data/quality.csv")
 ```
 
 (a) How much variation is left unexplained by the intercept model? (this will be

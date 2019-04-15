@@ -1,0 +1,142 @@
+---
+title: "Purification-Case"
+output: html_document
+---
+
+# youtube video showing these steps
+# https://www.youtube.com/watch?v=B6VOYhI51Gw
+
+```{r}
+purify = data.frame(x = 0:10, y=c(13.39,11.86,27.93,35.83,28.52,41.21,37.07,51.07,51.69,31.37,21.26))
+```
+
+```{r}
+fit = lm(y ~ x, purify)
+summary(fit)
+```
+
+<!--
+Call:
+lm(formula = y ~ x, data = purify)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-21.017  -8.512   2.213   8.663  15.003 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)  
+(Intercept)   21.577      6.783   3.181   0.0112 *
+x              2.070      1.147   1.805   0.1045  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 12.03 on 9 degrees of freedom
+Multiple R-squared:  0.2659,	Adjusted R-squared:  0.1843 
+F-statistic: 3.259 on 1 and 9 DF,  p-value: 0.1045
+-->
+
+<!--
+- this is from the summary above
+x              2.070      1.147   1.805   0.1045  
+
+- Insignificant coeficient for x. If we wanted to test the null hypothesis that the slope is non zero. Unit change in purifier what happens to y? Cannot reject the null hypothesis that the coeficient is zero. Can't conclude that x has a linear relationship with the dependent variable (yield). 
+
+F-statistic: 3.259 on 1 and 9 DF,  p-value: 0.1045
+
+The p-value is exacty the same value 0.1045 meaning that the linear model is not working.
+-->
+
+Use the residual plots to determine what is happening
+
+```{r fit}
+plot(fit)
+```
+
+<!--
+- The residual plot shows an inverted U shape, not a snowstorm or random scatter of plots. This indicates that the model is not linear.
+-->
+
+Look at a plot of the data
+
+```{r}
+plot(purify)
+```
+
+<!--
+- The plot seems like it is not a linear relationship, and also can see a sort of U shape. So the sense is that initially adding purifier doesn't do much, but the more you add it helps, but if you add too much it will start to hinder.
+-->
+
+```{r}
+fit2 = lm(y ~ x + I(x^2), purify)
+summary(fit2)
+```
+
+<!--
+Call:
+lm(formula = y ~ x + I(x^2), data = purify)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-9.9838 -5.7984 -0.3245  4.2510 12.5920 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)   
+(Intercept)   7.1664     6.0806   1.179  0.27243   
+x            11.6772     2.8290   4.128  0.00331 **
+I(x^2)       -0.9607     0.2725  -3.526  0.00778 **
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 7.981 on 8 degrees of freedom
+Multiple R-squared:  0.7126,	Adjusted R-squared:  0.6407 
+F-statistic: 9.916 on 2 and 8 DF,  p-value: 0.006827
+-->
+
+<!--
+- Check the null hypothesis, that the x slope and the quadratic slope I(x^2) are both equal to zero. Null hypothesis can be rejected since the p values of each are < 0.05. x is 0.00331 and quadratic is 0.00778.
+-->
+
+Create a line representing a fitted function, do this by creating a list of x values, and then creating the line using the fit2 values with the quadratic slope.
+
+```{r}
+x = seq(0,10, by=.1)
+x
+
+plot(purify)
+abline(fit)
+lines(x, 7.1664 + 11.6772*x -0.9607 * x^2)
+```
+
+<!--
+- This creates a linear model by hand
+-->
+
+This is a different way to create the same thing, but a "better" way, get the same curve but without rounding errors.
+
+```{r}
+plot(purify)
+abline(fit)
+lines(x, predict(fit2, data.frame(x=x)), col=2)
+```
+
+<!--
+- Can see that the point within the curved line and the straight line the best point is about 6ish, which is the optimal amount of purifier to add from the test data.
+-->
+
+
+Now find the value more exactly, or the min/max value (this is the equation on page 55 of the packet), -B1/2*B2
+
+```{r}
+b = coef(fit2)
+b
+-b[2]/(2*b[3])
+```
+
+<!--
+(Intercept)           x      I(x^2) 
+  7.1664336  11.6772261  -0.9607226 
+-->
+
+<!--
+- this value is where x (purifier amount to add) of 6.077314
+-->

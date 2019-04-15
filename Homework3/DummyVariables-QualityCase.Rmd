@@ -1,0 +1,84 @@
+---
+title: "DummyVariables-QualityCase"
+output: html_document
+---
+
+Dummy variables page 82 in packet. This is how we use nominal variables in a regression. They are called dummy (indicator) variables. Example was the quality case where AM and PM were compared and a variable (am) was assigned that took a value of 1 for morning shift and 0 for afternoon.
+
+Video on YouTube
+https://www.youtube.com/watch?v=ei0AVKt2EAA&t=3s
+
+AM is the dummy variable, where 1 is morning and 0 is afternoon
+
+K-1, so K is equal to the number of values in the dummy variable, here we have am and pm (0 and 1), so since we need 2 values to represent each category this would mean we need 2-1=1 dummy variable. In this case we choose am, could have chosen pm, or some other name
+
+Load the data
+```{r}
+quality <- read.csv("../data/quality.csv")
+```
+
+Run a regression for defects on AM
+
+```{r}
+fit = lm(defect ~ am, quality)
+summary(fit)
+```
+
+<!--
+Call:
+lm(formula = defect ~ am, data = quality)
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+-35.86 -11.14   4.26  11.97  23.44 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)   16.920      4.308   3.927  0.00051 ***
+am            20.440      6.093   3.355  0.00229 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 16.69 on 28 degrees of freedom
+Multiple R-squared:  0.2867,	Adjusted R-squared:  0.2612 
+F-statistic: 11.25 on 1 and 28 DF,  p-value: 0.002295
+-->
+
+<!--
+- the intercept is 16.920, this means that in the pm there are 16.920 defects per thousand
+- the am shows 20.440 which, means that in the morning there are 20.440 more defects than the pm per thousand
+
+y-hat = 16.920 + 20.440x
+so if x = 0 which is pm this shows y-hat = 16.920 + 20.440(0) = 16.920
+and if x = 1 which is am this shows y-hat = 16.920 + 20.440(1) = 37.36, this is the defects of the morning production
+-->
+
+
+This is equivalent to an independent-sample t-test with equal variances assumed
+```{r}
+t.test(defect ~ am, quality, var.equal=T)
+```
+
+<!--
+	Two Sample t-test
+
+data:  defect by am
+t = -3.3547, df = 28, p-value = 0.002295
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -32.920676  -7.959324
+sample estimates:
+mean in group 0 mean in group 1 
+          16.92           37.36 
+-->
+
+<!--
+- The mean for the t-test for group 0 is 16.92, this is when the intercept is 0, this is also the value for pm on the summary above
+- The mean for the t-test for group 1 is 37.36, this is similar to above where we calculated this from the regression line. So to get the slope we take 37.36 - 16.92 = 20.440.
+- the p-value in the t-test is 0.002295 which is the same in the summary for am p-value
+- the t value in the t-test is 3.3547 which is the same rounded as what is found in the summary t-value 3.355 for am
+
+- H0: B = 0 is the same as H0: uAM = uPM (if the means of AM and PM each other)
+- In this case the p-value is 0.00229 < 0.05, so we can reject the null hypthesis
+- Also, the t-test shows that the means 16.92 and 37.36 do not equal each other so we can reject the null hypothesis
+-->

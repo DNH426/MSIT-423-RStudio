@@ -1,0 +1,262 @@
+---
+title: "DummyVariables-WholesalerEfficiency"
+output: html_document
+---
+
+Dummy variables page 83 in packet. Looking at multiple variables
+
+Video on YouTube
+https://www.youtube.com/watch?v=ei0AVKt2EAA&t=3s
+
+Load the data
+```{r}
+click <- read.csv("../data/click-dummy.csv")
+```
+
+Look at the first 10 rows to understand the data and the dummy variables, the dummy variables are fair, good, outstand, and poor
+```{r}
+click[1:10, ]
+```
+
+<!--
+   sales ad reps eff fair good outstand
+1  260.3  5    3   4    0    0        1
+2  286.1  7    5   2    1    0        0
+3  279.4  6    3   3    0    1        0
+4  410.8  9    4   4    0    0        1
+5  438.2 12    6   1    0    0        0
+6  315.3  8    3   4    0    0        1
+7  565.1 11    7   3    0    1        0
+8  570.0 16    8   2    1    0        0
+9  426.1 13    4   3    0    1        0
+10 315.0  7    3   4    0    0        1
+-->
+
+<!--
+- Video explains the relationship of this data note that eff of 4 oustand is marked with 1, eff of 3 good is marked with 1, eff 2 fair is marked with one, eff 1 (poor) all values are set with 0,0,0
+-->
+
+Create a linear model to look at the data in click
+```{r}
+fit = lm(sales ~ ad+reps+fair+good+outstand, click)
+summary(fit)
+```
+
+<!--
+Call:
+lm(formula = sales ~ ad + reps + fair + good + outstand, data = click)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-87.943 -24.453  -7.675  27.280  76.184 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)   45.051     36.631   1.230    0.227    
+ad            13.063      2.940   4.443 8.96e-05 ***
+reps          40.948      8.009   5.113 1.23e-05 ***
+fair           9.239     27.916   0.331    0.743    
+good          20.283     29.344   0.691    0.494    
+outstand      33.260     28.440   1.169    0.250    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 45.7 on 34 degrees of freedom
+Multiple R-squared:  0.8813,	Adjusted R-squared:  0.8638 
+F-statistic: 50.48 on 5 and 34 DF,  p-value: 9.055e-15
+-->
+
+<!--
+all "on the average"
+- understand that fair is 9.239 better than poor - on the average
+- good is 20.283 better than poor - on the average
+- outstand is 33.260 better than poor - on the average
+
+- good is also about 11 better than fair - on the average
+- outstand is also about 13 better than good - on the average
+-->
+
+Add an explicit poor column
+```{r}
+click$poor = as.numeric(click$eff==1)
+click[1:10,]
+
+```
+<!--
+   sales ad reps eff fair good outstand poor
+1  260.3  5    3   4    0    0        1    0
+2  286.1  7    5   2    1    0        0    0
+3  279.4  6    3   3    0    1        0    0
+4  410.8  9    4   4    0    0        1    0
+5  438.2 12    6   1    0    0        0    1
+6  315.3  8    3   4    0    0        1    0
+7  565.1 11    7   3    0    1        0    0
+8  570.0 16    8   2    1    0        0    0
+9  426.1 13    4   3    0    1        0    0
+10 315.0  7    3   4    0    0        1    0
+-->
+
+Now create a new model removing oustanding, but using poor, fair, and good
+```{r}
+fit2 = lm(sales ~ ad+reps+poor+fair+good, click)
+summary(fit2)
+```
+<!--
+Call:
+lm(formula = sales ~ ad + reps + poor + fair + good, data = click)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-87.943 -24.453  -7.675  27.280  76.184 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)   78.311     26.993   2.901  0.00648 ** 
+ad            13.063      2.940   4.443 8.96e-05 ***
+reps          40.948      8.009   5.113 1.23e-05 ***
+poor         -33.260     28.440  -1.169  0.25034    
+fair         -24.020     19.339  -1.242  0.22272    
+good         -12.976     18.643  -0.696  0.49114    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 45.7 on 34 degrees of freedom
+Multiple R-squared:  0.8813,	Adjusted R-squared:  0.8638 
+F-statistic: 50.48 on 5 and 34 DF,  p-value: 9.055e-15
+-->
+
+<!--
+- so similarly poor is -33.260 worse than outstanding
+- fair is -24.020 worse than outstanding
+- good is -12.976 worse than outstanding
+
+main point is that it doesn't matter what category we pick for dummy variables, the same relationships can be interpreted from the data
+-->
+
+Cast eff as a categorical variable by using as.factor
+```{r}
+fit3 = lm(sales ~ ad+reps+as.factor(eff), click)
+summary(fit3)
+```
+<!--
+Call:
+lm(formula = sales ~ ad + reps + as.factor(eff), data = click)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-87.943 -24.453  -7.675  27.280  76.184 
+
+Coefficients:
+                Estimate Std. Error t value Pr(>|t|)    
+(Intercept)       45.051     36.631   1.230    0.227    
+ad                13.063      2.940   4.443 8.96e-05 ***
+reps              40.948      8.009   5.113 1.23e-05 ***
+as.factor(eff)2    9.239     27.916   0.331    0.743    
+as.factor(eff)3   20.283     29.344   0.691    0.494    
+as.factor(eff)4   33.260     28.440   1.169    0.250    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 45.7 on 34 degrees of freedom
+Multiple R-squared:  0.8813,	Adjusted R-squared:  0.8638 
+F-statistic: 50.48 on 5 and 34 DF,  p-value: 9.055e-15
+-->
+
+<!--
+- note as.factor variables that have been created 2, 3, 4 this is exactly as the first example
+- advantage is can use drop1 on the data by creating categorical variables this way
+-->
+
+Drop 1 with F-test to see the impact of each variable if we were to drop it from the model
+```{r}
+drop1(fit3, test="F")
+```
+<!--
+Single term deletions
+
+Model:
+sales ~ ad + reps + as.factor(eff)
+               Df Sum of Sq    RSS    AIC F value    Pr(>F)    
+<none>                       71018 311.27                      
+ad              1     41227 112245 327.58 19.7376 8.955e-05 ***
+reps            1     54607 125625 332.09 26.1433 1.226e-05 ***
+as.factor(eff)  3      4457  75475 307.71  0.7112     0.552    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+-->
+
+<!--
+- f-test shows how significant the data is, so if we "drop" ad we lose 41227 data, if we drop reps we lose 54607, and if we drop categorical eff we lose 4457
+- the p-value of 0.552 indicate that the 3 values are not significant
+-->
+
+Look at deviance
+```{r}
+fit4 = lm(sales ~ ad+reps, click)
+deviance(fit4)
+deviance(fit3)
+deviance(fit4) - deviance(fit3)
+```
+<!--
+[1] 75474.56  - deviance(fit4) (fit4 = lm(sales ~ ad+reps, click)
+[1] 71017.78  - deviance(fit3) (fit3 = lm(sales ~ ad+reps+as.factor(eff), click))
+[1] 4456.785  - deviance(fit4) - deviance(fit3)
+-->
+
+<!--
+- the deviance is what is the amount unexplained by the model
+- fit4 accounts for less so there is more that is unexplained
+- fit3 accounts for the categorical variable which includes eff, so there is less unexplained by that model
+- if you take the difference of the deviance of fit4 and fit3 you get 4456.785, this is the same as what the drop1 calculates. So this is how drop1 calculates the Sum of Sq, or what is explained by the model.
+-->
+
+Where do we get the F statistic value from the drop1?
+```{r}
+anova(fit3)
+```
+<!--
+Analysis of Variance Table
+
+Response: sales
+               Df Sum Sq Mean Sq  F value    Pr(>F)    
+ad              1 463451  463451 221.8787 < 2.2e-16 ***
+reps            1  59327   59327  28.4032 6.414e-06 ***
+as.factor(eff)  3   4457    1486   0.7112     0.552    
+Residuals      34  71018    2089                       
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+-->
+
+<!--
+- get the residuals for the Mean Sq, which is 2089
+- use the df degress of freedom from the drop1 for eff which is 3
+-->
+
+```{r}
+(deviance(fit4)-deviance(fit3))/3/2089
+```
+<!--
+[1] 0.7111513
+-->
+
+<!--
+- Calculate the F statistic which is 0.7111513, which matches the drop1 F value of 0.7112
+-->
+
+Where do we get the P value from the drop1?
+```{r}
+1-pf((deviance(fit4)-deviance(fit3))/3/2089, 3, 34)
+```
+<!--
+[1] 0.5520948
+-->
+
+<!--
+- this is using the anova df 3 and df 34 to calculate the p-value, which is 0.5520948
+- this matches the drop1 p-value for eff of 0.552
+
+SUMMARY
+- if you want to incorporate a categorical variable use dummies
+- you need one less dummy than the number of values that the variable takes
+- you can use drop1 to determine what is the effect of including all those dummies, and in this case eff is not helping much so can drop the wholesaler efficiency variable from the model
+-->
