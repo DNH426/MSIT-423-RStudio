@@ -67,35 +67,34 @@ F-statistic: 631.7 on 5 and 391 DF,  p-value: < 2.2e-16
 (d) Describe the effect of year on log(mpg), i.e., is it U-shaped, inverted-U shaped, or linear? If it is nonlinear, where is the minimum or maximum. Draw a graph showing the effect.
 
 ```{r}
-fit3 = lm(year ~ mpg + log(mpg), auto)
+fit3 = lm(year ~ log(mpg), auto)
 summary(fit3)
 plot(fit3)
 ```
 
 <!--
 Call:
-lm(formula = year ~ mpg + log(mpg), data = auto)
+lm(formula = year ~ log(mpg), data = auto)
 
 Residuals:
     Min      1Q  Median      3Q     Max 
--8.0712 -2.1187  0.1722  2.4259  6.5888 
+-7.8418 -2.0185  0.3031  2.5042  6.4684 
 
 Coefficients:
             Estimate Std. Error t value Pr(>|t|)    
-(Intercept)  65.4400     5.2191  12.539   <2e-16 ***
-mpg           0.1904     0.1078   1.767    0.078 .  
-log(mpg)      1.9598     2.4796   0.790    0.430    
+(Intercept)  56.5499     1.3901   40.68   <2e-16 ***
+log(mpg)      6.2700     0.4456   14.07   <2e-16 ***
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-Residual standard error: 3.007 on 394 degrees of freedom
-Multiple R-squared:  0.3392,	Adjusted R-squared:  0.3358 
-F-statistic: 101.1 on 2 and 394 DF,  p-value: < 2.2e-16
+Residual standard error: 3.015 on 395 degrees of freedom
+Multiple R-squared:  0.3339,	Adjusted R-squared:  0.3322 
+F-statistic:   198 on 1 and 395 DF,  p-value: < 2.2e-16
 -->
 
 <!--
-- The data looks linear.
-- Check the null hypothesis, that the x slope and the log slope log(mpg) are both equal to zero. The Null hypothesis cannot be rejected since the p values of each coefficients are > 0.05. mpg is 0.078 and the log(mpg) is 0.430.
+- The data looks linear, but there is a slight U-shape
+- Check the null hypothesis, that the log slope log(mpg) is equal to zero. The Null hypothesis can be rejected since the p values is < 0.05. the log(mpg) is 2e-16.
 -->
 
 (e) What does the coefficient for log(weight) tell you?
@@ -120,107 +119,102 @@ Here origin was set to US, Europe, and Japan
 -->
 
 ```{r}
-fit3 = lm(mpg ~ as.factor(origin) + weight + year, auto)
-summary(fit3)
-drop1(fit3, test="F")
+fit4 = lm(log(mpg) ~ as.factor(origin) + log(weight) + year + I(year^2), auto)
+summary(fit4)
+drop1(fit4, test="F")
 ```
 <!--
 Call:
-lm(formula = mpg ~ as.factor(origin) + weight + year, data = auto)
+lm(formula = log(mpg) ~ as.factor(origin) + log(weight) + year + 
+    I(year^2), data = auto)
 
 Residuals:
-    Min      1Q  Median      3Q     Max 
--9.5855 -2.1343 -0.0344  1.7727 13.5142 
+     Min       1Q   Median       3Q      Max 
+-0.37408 -0.06782  0.00899  0.06903  0.35766 
 
 Coefficients:
                           Estimate Std. Error t value Pr(>|t|)    
-(Intercept)             -1.859e+01  3.968e+00  -4.683 3.90e-06 ***
-as.factor(origin)Europe  2.097e+00  5.110e-01   4.103 4.97e-05 ***
-as.factor(origin)Japan   2.203e+00  5.157e-01   4.271 2.44e-05 ***
-weight                  -5.900e-03  2.575e-04 -22.909  < 2e-16 ***
-year                     7.740e-01  4.815e-02  16.075  < 2e-16 ***
+(Intercept)             18.4693014  2.6833895   6.883 2.34e-11 ***
+as.factor(origin)Europe  0.0668291  0.0176293   3.791 0.000174 ***
+as.factor(origin)Japan   0.0319711  0.0179382   1.782 0.075477 .  
+log(weight)             -0.8750305  0.0270390 -32.362  < 2e-16 ***
+year                    -0.2559684  0.0712094  -3.595 0.000366 ***
+I(year^2)                0.0019051  0.0004687   4.065 5.81e-05 ***
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-Residual standard error: 3.336 on 392 degrees of freedom
-Multiple R-squared:  0.8201,	Adjusted R-squared:  0.8183 
-F-statistic: 446.8 on 4 and 392 DF,  p-value: < 2.2e-16
+Residual standard error: 0.1136 on 391 degrees of freedom
+Multiple R-squared:  0.8898,	Adjusted R-squared:  0.8884 
+F-statistic: 631.7 on 5 and 391 DF,  p-value: < 2.2e-16
 
 Single term deletions
 
 Model:
-mpg ~ as.factor(origin) + weight + year
-                  Df Sum of Sq     RSS     AIC F value    Pr(>F)    
-<none>                          4362.9  961.60                      
-as.factor(origin)  2     275.4  4638.3  981.89  12.371 6.169e-06 ***
-weight             1    5841.1 10204.0 1296.90 524.808 < 2.2e-16 ***
-year               1    2876.0  7238.9 1160.61 258.400 < 2.2e-16 ***
+log(mpg) ~ as.factor(origin) + log(weight) + year + I(year^2)
+                  Df Sum of Sq     RSS     AIC   F value    Pr(>F)    
+<none>                          5.0449 -1721.1                        
+as.factor(origin)  2    0.1857  5.2306 -1710.8    7.1968 0.0008523 ***
+log(weight)        1   13.5126 18.5574 -1206.0 1047.2853 < 2.2e-16 ***
+year               1    0.1667  5.2116 -1710.2   12.9211 0.0003664 ***
+I(year^2)          1    0.2132  5.2580 -1706.7   16.5224 5.814e-05 ***
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
--->
-
-<!--
-- if we drop origin we will lose 275.4, and the p-value indicates that this field is significant where it is 6.169e-06 which is < 0.05.
 -->
 
 (g) Can you reject the null hypothesis that both origin dummies are 0, so that none of the origin levels have different effects?
 <!--
-yes, we can reject the null hypothesis, again the p-value is 6.169e-06 which is < 0.05 for as.factor(orign) which are treated as categorical (dummy variables).
+yes, we can reject the null hypothesis, the drop1 shows that the p-value is again the p-value is 0.0008523 for categorical origin which is < 0.05.
 -->
 
 (h) Interpret the effect of origin on log(mpg). Which origin has the best gas milage? Worst? Rank them in order of gas milage from least to greatest.
 <!--
-Data from above summary(fit3)
+Data from above summary
 
-as.factor(origin)Europe  2.097e+00  5.110e-01   4.103 4.97e-05 ***
-as.factor(origin)Japan   2.203e+00  5.157e-01   4.271 2.44e-05 ***
+as.factor(origin)Europe  0.0668291  0.0176293   3.791 0.000174 ***
+as.factor(origin)Japan   0.0319711  0.0179382   1.782 0.075477 .  
 -->
 
 <!--
-- The interpretation of this data is that Europe is 2.097 better in mpg than the US
-- That Japan is 2.203 better in mpg than the US
+- The interpretation of this data is that Europe is 0.0668291 better in mpg than the US
+- That Japan is 0.0319711 better in mpg than the US
 -->
 
 (i) For the test in question 1g, give the details of how the test statistic and P-value were computed.
 <!--
-- this is the data from the drop1, note that the test statistic F value is 12.371
-- note that the p value is 6.169e-06
+- below is the data from the drop1, note that the test statistic F value is 7.1968 for origin
+- note that the p value is 0.0008523
 
 Single term deletions
 
 Model:
-mpg ~ as.factor(origin) + weight + year
-                  Df Sum of Sq     RSS     AIC F value    Pr(>F)    
-<none>                          4362.9  961.60                      
-as.factor(origin)  2     275.4  4638.3  981.89  12.371 6.169e-06 ***
-weight             1    5841.1 10204.0 1296.90 524.808 < 2.2e-16 ***
-year               1    2876.0  7238.9 1160.61 258.400 < 2.2e-16 ***
+log(mpg) ~ as.factor(origin) + log(weight) + year + I(year^2)
+                  Df Sum of Sq     RSS     AIC   F value    Pr(>F)    
+<none>                          5.0449 -1721.1                        
+as.factor(origin)  2    0.1857  5.2306 -1710.8    7.1968 0.0008523 ***
+log(weight)        1   13.5126 18.5574 -1206.0 1047.2853 < 2.2e-16 ***
+year               1    0.1667  5.2116 -1710.2   12.9211 0.0003664 ***
+I(year^2)          1    0.2132  5.2580 -1706.7   16.5224 5.814e-05 ***
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 -->
 
 Look at deviance
-<!--
-Make note of this line from above where the F value is 12.371 and P value is 6.169e-06
-                  Df Sum of Sq     RSS     AIC F value    Pr(>F)    
-as.factor(origin)  2     275.4  4638.3  981.89  12.371 6.169e-06 ***
--->
 
 ```{r}
-fit4 = lm(mpg ~ weight + year, auto)
+fit4 = lm(log(mpg) ~ log(weight) + year + I(year^2), auto)
 deviance(fit4)
 deviance(fit3)
 deviance(fit4) - deviance(fit3)
 ```
 <!--
-[1] 4638.314  - deviance(fit4) (fit4 = lm(mpg ~ weight + year, auto)
-[1] 4362.945  - deviance(fit3) (fit3 = lm(mpg ~ as.factor(origin) + weight + year, auto)
-[1] 275.3693  - deviance(fit4) - deviance(fit3)
+[1] 5.230573  - deviance(fit4) (fit4 = log(mpg) ~ log(weight) + year + I(year^2), auto)
+[1] 5.04486  - deviance(fit3) (fit3 = lm(mpg ~ as.factor(origin) + weight + year, auto)
+[1] 0.1857133  - deviance(fit4) - deviance(fit3)
 
 - the deviance is what is the amount unexplained by the model
 - fit4 accounts for less so there is more that is unexplained
 - fit3 accounts for the categorical variable which includes origin, so there is less unexplained by that model
-- if you take the difference of the deviance of fit4 and fit3 you get 275.3693, this is the same as what the drop1 calculates. So this is how drop1 calculates the Sum of Sq, or what is explained by the model.
+- if you take the difference of the deviance of fit4 and fit3 you get 0.1857133, this is the same as what the drop1 calculates. So this is how drop1 calculates the Sum of Sq, or what is explained by the model.
 -->
 
 The F statistic
@@ -230,45 +224,42 @@ anova(fit3)
 <!--
 Analysis of Variance Table
 
-Response: mpg
-                   Df Sum Sq Mean Sq F value    Pr(>F)    
-as.factor(origin)   2 8081.1  4040.5  363.03 < 2.2e-16 ***
-weight              1 8932.3  8932.3  802.54 < 2.2e-16 ***
-year                1 2876.0  2876.0  258.40 < 2.2e-16 ***
-Residuals         392 4362.9    11.1                      
+Response: log(mpg)
+                   Df  Sum Sq Mean Sq  F value    Pr(>F)    
+as.factor(origin)   2 15.1819  7.5910  588.335 < 2.2e-16 ***
+log(weight)         1 19.9156 19.9156 1543.552 < 2.2e-16 ***
+year                1  5.4437  5.4437  421.912 < 2.2e-16 ***
+I(year^2)           1  0.2132  0.2132   16.522 5.814e-05 ***
+Residuals         391  5.0449  0.0129                       
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 -->
-<!--
-- get the residuals for the Mean Sq, which is 11.1
-- use the df degress of freedom from the drop1 for origin which is 2
--->
 
 ```{r}
-(deviance(fit4)-deviance(fit3))/2/11.1
+(deviance(fit4)-deviance(fit3))/2/0.0129
 ```
 <!--
-[1] 12.40402
+[1] 7.198191
 -->
 
 <!--
-- Calculate the F statistic which is 12.40402, which is close to the the drop1 F value of 12.371
-- Look at packet page 55 this shows the equation for F
-F = (delta RSS/ delta df) / Se^2
-- Looking at the video the above is what he did to calculate the F statistic
+from the drop1 table this matches the 7.1968 (snippet from drop 1 table below)
+
+                  Df Sum of Sq     RSS     AIC   F value    Pr(>F)    
+<none>                          5.0449 -1721.1                        
+as.factor(origin)  2    0.1857  5.2306 -1710.8    7.1968 0.0008523 ***
 -->
 
 The P value
 ```{r}
-1-pf((deviance(fit4)-deviance(fit3))/2/11.1, 2, 392)
+1-pf((deviance(fit4)-deviance(fit3))/2/0.0129, 2, 391)
 ```
 <!--
-[1] 5.978547e-06
+[1] 0.00085122
 -->
 
 <!--
-- this is using the anova df 2 (origin) and df 392 (residual) to calculate the p-value, which is 5.978547e-06
-- this is not exactly the drop1 p-value for eff of 6.169e-06 but is close enough to say that it is < 0.05 and has an effect on the model
+- this is using the anova df 2 (origin) and df 391 (residual) to calculate the p-value, which is 0.00085122, which is close to what R calculated which was 0.0008523.
 -->
 
 (j) After controlling for the other vairables, what is the difference in log(mpg) between Japan and Europe, on the average?
